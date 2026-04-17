@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS query_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question TEXT NOT NULL,
+    generated_sql TEXT NOT NULL,
+    row_count INTEGER NOT NULL,
+    success BOOLEAN NOT NULL DEFAULT 1,
+    error TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,17 @@
+# Arquivos do Python (Ignora em qualquer subpasta do repositório)
+__pycache__/
+*.py[oc]
+*.egg-info/
+
+# Build e Dist específicos do server
+server/build/
+server/dist/
+server/wheels/
+
+# Ambientes virtuais e variáveis no server
+server/.venv/
+server/.env
+
+# Bancos de dados e arquivos de lock no server
+server/*.db
+server/*.lock

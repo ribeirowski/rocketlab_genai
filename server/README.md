@@ -12,6 +12,9 @@ Um assistente de dados inteligente que traduz perguntas em linguagem natural em 
 - **Segurança e Proteção**: Proteção integrada contra operações SQL destrutivas (drops, deletes, etc.).
 - **API Moderna**: Backend assíncrono com endpoints autodocumentados (Swagger/OpenAPI).
 - **Segurança de Tipos**: Integração total com Pydantic para validação robusta de requisições e respostas.
+- **Frontend integrado**: Uma interface React + Vite (na pasta `web/`) foi adicionada para facilitar perguntas e visualização dos resultados.
+- **Melhorias de robustez**: o serviço agora evita que o LLM consulte tabelas internas de auditoria (questions, query_history, feedback) e tenta uma regeneração guiada quando o SQL gerado referencia tabelas que não existem.
+- **Scripts utilitários**: adicionados `server/scripts/inspect_db.py` (inspeção rápida do banco) e `server/scripts/seed_sample_business.py` (cria tabelas de exemplo produtos/itens_venda para testes).
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -48,6 +51,19 @@ Um assistente de dados inteligente que traduz perguntas em linguagem natural em 
 
    ```env
    GEMINI_API_KEY="sua_chave_api_aqui"
+   ```
+
+   ### Novidades e utilitários adicionados
+
+   - `server/scripts/inspect_db.py`: lista tabelas existentes, contagens e amostras — útil para debug rápido do banco.
+   - `server/scripts/seed_sample_business.py`: cria tabelas `produtos` e `itens_venda` com dados de exemplo (somente para ambiente de desenvolvimento/testes).
+   - Frontend: pasta `web/` contém um app React + Vite com UI de chat. O dev server do Vite está configurado para proxiar `/api` para `http://localhost:8000` durante o desenvolvimento.
+
+   Para usar os utilitários (exemplos):
+
+   ```pwsh
+   python server/scripts/inspect_db.py
+   python server/scripts/seed_sample_business.py
    ```
 
 ### Executando a Aplicação
@@ -98,6 +114,7 @@ server/
 ├── banco.db             # Arquivo do banco de dados SQLite
 ├── pyproject.toml       # Dependências e metadados do projeto
 └── .env                 # Segredos de ambiente (não versionado)
+web/                    # Frontend React + Vite (chat UI)
 ```
 
 ---

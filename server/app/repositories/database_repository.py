@@ -18,9 +18,12 @@ class DatabaseRepository(BaseRepository):
     def get_schema(self) -> str:
         try:
             with self._connect() as conn:
-                tables = conn.execute(
+                rows = conn.execute(
                     "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
                 ).fetchall()
+                # Hide internal/audit tables from the schema exposed to the LLM
+                hidden = {"questions", "query_history", "feedback"}
+                tables = [r for r in rows if r["name"] not in hidden]
                 parts = []
                 for table in tables:
                     cols = conn.execute(f"PRAGMA table_info({table['name']})").fetchall()
@@ -36,7 +39,8 @@ class DatabaseRepository(BaseRepository):
                 rows = conn.execute(
                     "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
                 ).fetchall()
-                return [row["name"] for row in rows]
+                hidden = {"questions", "query_history", "feedback"}
+                return [row["name"] for row in rows if row["name"] not in hidden]
         except sqlite3.Error as e:
             raise DatabaseQueryException(f"Failed to list tables: {e}") from e
 
@@ -51,8 +55,22 @@ class DatabaseRepository(BaseRepository):
                 rows = conn.execute(limited_sql).fetchall()
                 return [dict(row) for row in rows]
         except sqlite3.Error as e:
-            logger.error("Query error | SQL: %s | Error: %s", sql, e)
-            raise DatabaseQueryException(f"Execution error: {e}") from e
+            err_str = str(e)
+            logger.error("Query error | SQL: %s | Error: %s", sql, err_str)
+            # If the error is a missing table, include available tables to help debugging
+            if "no such table" in err_str.lower():
+                try:
+                    with self._connect() as conn2:
+                        rows = conn2.execute(
+                            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+                        ).fetchall()
+                        available = [r["name"] for r in rows]
+                except Exception:
+                    available = []
+                raise DatabaseQueryException(
+                    f"Execution error: {err_str}. Available tables: {available}"
+                ) from e
+            raise DatabaseQueryException(f"Execution error: {err_str}") from e
 
     def health_check(self) -> bool:
         try:

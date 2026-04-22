@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Basic app container */
+.app-bg {
+  @apply bg-white text-black;
+}
+
+.chat-container {
+  @apply max-w-3xl mx-auto p-4 md:p-8;
+}
+
+.rounded-input {
+  @apply flex-1 rounded-md border border-black/10 p-3 bg-white text-black;
+}
+
+.btn-primary {
+  @apply bg-black text-white px-4 py-2 rounded-md font-semibold shadow-sm hover:brightness-90;
+}
+
+.message-user {
+  @apply text-right;
+}
+
+.message-assistant {
+  @apply text-left;
+}
+
+/* Theme: black & white, modern */
+.page-center {
+  @apply min-h-screen flex items-center justify-center p-6;
+}
+
+.card {
+  @apply w-full max-w-4xl bg-white shadow-lg rounded-2xl border border-black/5;
+}
+
+.card-body {
+  @apply p-6 md:p-8;
+}
+
+.chat-scroll {
+  @apply space-y-4 mb-4 max-h-[60vh] overflow-auto pr-2;
+}
+
+.input-row {
+  @apply mt-4 flex gap-3 items-center;
+}
+
+.user-bubble {
+  @apply self-end bg-black text-white rounded-lg px-4 py-2 shadow-md max-w-[75%];
+}
+
+.assistant-bubble {
+  @apply self-start bg-white text-black rounded-lg px-4 py-3 border border-black/5 shadow-sm max-w-[90%];
+}
+
+.meta {
+  @apply text-sm text-black/60 mt-1;
+}
+
+.sql-block {
+  @apply bg-slate-900 text-white rounded-md p-3 font-mono text-sm overflow-auto;
+}
+
+.data-table {
+  @apply w-full border-collapse text-sm mt-3;
+}
+
+.data-table th {
+  @apply text-left border-b border-black/10 pb-2 font-medium;
+}
+
+.data-table td {
+  @apply py-1 border-b border-black/5;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: #f3f3f3;
+  border-radius: 8px;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  height: 100%;
+  width: 150%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+.skeleton-line {
+  height: 12px;
+  background: #eee;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}

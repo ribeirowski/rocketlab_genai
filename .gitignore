@@ -15,3 +15,31 @@ server/.env
 # Bancos de dados e arquivos de lock no server
 server/*.db
 server/*.lock
+
+# --- Frontend / Node ---
+node_modules/
+web/node_modules/
+web/dist/
+web/.vite/
+web/build/
+web/.env
+
+# Environment files (don't commit secrets)
+.env
+.env.*
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage and test outputs
+coverage/

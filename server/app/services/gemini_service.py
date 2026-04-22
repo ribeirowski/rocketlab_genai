@@ -78,6 +78,7 @@ class GeminiService:
             "Dado um schema, escreva APENAS o SQL para responder à pergunta. "
             "Retorne somente o código SQL, sem markdown, sem explicações. "
             "Use aliases descritivos em português nas colunas. "
+            "Use SOMENTE as tabelas listadas no bloco 'Schema' fornecido. NÃO invente nomes de tabelas. "
             "SEMPRE use GROUP BY e agregações quando a pergunta envolver listas. "
             "NUNCA retorne todas as linhas de uma tabela sem filtro ou agregação. "
             "NUNCA use INSERT, UPDATE, DELETE, DROP, ALTER ou TRUNCATE. "

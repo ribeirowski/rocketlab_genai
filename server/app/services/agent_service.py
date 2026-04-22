@@ -24,7 +24,15 @@ class AgentService:
         self.guardrail.validate(question)
 
         schema = self.db_repo.get_schema()
-        sql = self.llm.generate_sql(question, schema)
+        # Append an explicit list of available tables to the schema so the LLM uses the correct names
+        try:
+            tables = self.db_repo.get_tables()
+            tables_line = "\n\nTabelas disponíveis: " + ", ".join(tables)
+        except Exception:
+            tables_line = ""
+        schema_with_tables = schema + tables_line + "\nNÃO use tabelas que não existam no banco."
+
+        sql = self.llm.generate_sql(question, schema_with_tables)
         # Prevent generated SQL from targeting internal/audit tables
         hidden_tables = {"questions", "query_history", "feedback"}
         sql_lower = sql.lower()

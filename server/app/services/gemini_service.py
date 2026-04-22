@@ -19,21 +19,49 @@ class GeminiService:
         self.model = settings.GEMINI_MODEL
         
     def _call(self, system_instruction: str, prompt: str) -> str:
-        try:
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_instruction,
-                    max_output_tokens=get_settings().GEMINI_MAX_TOKENS,
-                    temperature=0.0,
-                ),
-            )
-            return response.text.strip()
-        except Exception as e:
-            if "429" in str(e):
-                raise RateLimitException("Rate limit exceeded.") from e
-            raise
+        # Simple retry/backoff for transient errors (including 429)
+        max_retries = 3
+        backoff = 1.0
+        last_exc = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        max_output_tokens=get_settings().GEMINI_MAX_TOKENS,
+                        temperature=0.0,
+                    ),
+                )
+
+                # Defensive checks: ensure response and response.text exist
+                if response is None:
+                    raise RuntimeError("Empty response from Gemini client")
+                text = getattr(response, 'text', None)
+                if text is None:
+                    # Try to log the response object for debugging
+                    logger.error("Gemini response has no text attribute: %s", repr(response))
+                    raise RuntimeError("Gemini returned no text in response")
+
+                return text.strip()
+            except Exception as e:
+                last_exc = e
+                # Detect rate limit in error message
+                if "429" in str(e) or isinstance(e, RateLimitException):
+                    logger.warning("Gemini rate limit detected (attempt %d/%d): %s", attempt, max_retries, e)
+                    # If it's the last attempt, raise RateLimitException
+                    if attempt == max_retries:
+                        raise RateLimitException("Rate limit exceeded.") from e
+                else:
+                    logger.warning("Gemini call failed (attempt %d/%d): %s", attempt, max_retries, e)
+
+                # simple exponential backoff
+                time.sleep(backoff)
+                backoff *= 2
+
+        # If we exhausted retries, raise the last exception wrapped
+        raise RuntimeError(f"Gemini client failed after {max_retries} attempts: {last_exc}") from last_exc
     
     def _build_sql_prompt(self, question: str, schema: str) -> str:
         plural_hint = ""
